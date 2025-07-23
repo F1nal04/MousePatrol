@@ -8,7 +8,10 @@ pyautogui.FAILSAFE = True
 square_size = 100
 
 # Speed of mouse movement (in seconds)
-move_duration = 0.5
+move_duration = 0.25
+
+# Tweening function for smooth movement
+tween_func = pyautogui.easeInOutQuad
 
 
 def move_in_square():
@@ -19,17 +22,20 @@ def move_in_square():
     print(f"Starting square movement from position ({start_x}, {start_y})")
 
     # Move right
-    pyautogui.moveTo(start_x + square_size, start_y, duration=move_duration)
+    pyautogui.moveTo(start_x + square_size, start_y,
+                     duration=move_duration, tween=tween_func)
 
     # Move down
-    pyautogui.moveTo(start_x + square_size, start_y +
-                     square_size, duration=move_duration)
+    pyautogui.moveTo(start_x + square_size, start_y + square_size,
+                     duration=move_duration, tween=tween_func)
 
     # Move left
-    pyautogui.moveTo(start_x, start_y + square_size, duration=move_duration)
+    pyautogui.moveTo(start_x, start_y + square_size,
+                     duration=move_duration, tween=tween_func)
 
     # Move up (back to start)
-    pyautogui.moveTo(start_x, start_y, duration=move_duration)
+    pyautogui.moveTo(start_x, start_y,
+                     duration=move_duration, tween=tween_func)
 
     print("Square movement completed")
 
