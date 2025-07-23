@@ -1,0 +1,145 @@
+name: Create Version Tag
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Version bump type"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'github-actions[bot]' && github.event.head_commit.author.email != 'action@github.com' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Get latest tag version
+        id: get_version
+        run: |
+          # Get the latest tag matching v*.*.*
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+
+      - name: Determine version bump type
+        id: determine_bump
+        run: |
+          VERSION_TYPE="${{ github.event.inputs.version_type || 'auto' }}"
+
+          if [ "$VERSION_TYPE" != "auto" ]; then
+            echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+            echo "Manual version type selected: $VERSION_TYPE"
+            exit 0
+          fi
+
+          # Get commits since last version tag
+          LAST_TAG="${{ steps.get_version.outputs.latest_tag }}"
+          if [ "$LAST_TAG" != "v0.0.0" ]; then
+            COMMITS=$(git log --oneline --format="%s" $LAST_TAG..HEAD)
+            COMMIT_BODIES=$(git log --format="%B" $LAST_TAG..HEAD)
+          else
+            COMMITS=$(git log --oneline --format="%s" -n 10)
+            COMMIT_BODIES=$(git log --format="%B" -n 10)
+          fi
+
+          echo "Analyzing commits:"
+          echo "$COMMITS"
+
+          # Check for breaking changes (BREAKING CHANGE in commit body, BREAKING CHANGE: as commit type, or ! after type)
+          HAS_BREAKING=false
+          if echo "$COMMIT_BODIES" | grep -q "BREAKING CHANGE" || \
+             echo "$COMMITS" | grep -q "^BREAKING CHANGE:" || \
+             echo "$COMMITS" | grep -q "^[a-zA-Z]\+!:"; then
+            HAS_BREAKING=true
+          fi
+
+          # Check for features
+          HAS_FEAT=false
+          if echo "$COMMITS" | grep -q "^feat:\|^feature:"; then
+            HAS_FEAT=true
+          fi
+
+          # Determine bump type based on conventional commits
+          # Priority: BREAKING CHANGE -> feat -> everything else (patch)
+          if [ "$HAS_BREAKING" = true ]; then
+            BUMP_TYPE="major"
+          elif [ "$HAS_FEAT" = true ]; then
+            BUMP_TYPE="minor"
+          else
+            BUMP_TYPE="patch"  # fix, docs, ci, refactor, and all other commit types
+          fi
+
+          echo "version_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Determined version bump type: $BUMP_TYPE"
+          echo "Has breaking changes: $HAS_BREAKING"
+          echo "Has features: $HAS_FEAT"
+
+      - name: Calculate new version
+        id: calc_version
+        run: |
+          LATEST_TAG="${{ steps.get_version.outputs.latest_tag }}"
+          VERSION_TYPE="${{ steps.determine_bump.outputs.version_type }}"
+
+          # Remove 'v' prefix
+          VERSION_NUM=${LATEST_TAG#v}
+          IFS='.' read -r major minor patch <<< "$VERSION_NUM"
+
+          # Default to 0 if empty
+          major=${major:-0}
+          minor=${minor:-0}
+          patch=${patch:-0}
+
+          # Bump version based on type
+          case $VERSION_TYPE in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+
+          NEW_VERSION="$major.$minor.$patch"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION (was $LATEST_TAG, bump type: $VERSION_TYPE)"
+
+      - name: Create and push git tag
+        run: |
+          NEW_VERSION="${{ steps.calc_version.outputs.new_version }}"
+          VERSION_TYPE="${{ steps.determine_bump.outputs.version_type }}"
+
+          # Create annotated tag with release information
+          git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION ($VERSION_TYPE bump)"
+
+          # Push the tag to remote
+          git push origin "v$NEW_VERSION"
+
+          echo "Created and pushed tag: v$NEW_VERSION"
