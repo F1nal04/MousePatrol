@@ -17,7 +17,7 @@
 Install dependencies:
 
 ```sh
-pip install pyautogui
+pip install -r requirements.txt
 ```
 
 ## Usage
