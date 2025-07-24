@@ -9,33 +9,44 @@
 - Simple, lightweight, and easy to use
 - Emergency stop: move your mouse to the top-left corner or press Ctrl+C
 
-## Requirements
+## Installation
 
-- Python 3.x
-- [pyautogui](https://pypi.org/project/pyautogui/)
-
-Install dependencies:
+### Install from PyPI (Recommended)
 
 ```sh
-pip install -r requirements.txt
+pip install mouse-patrol
 ```
 
-## Usage
+### Manual Installation
 
 1. Clone this repository:
 
    ```sh
-   git clone https://github.com/yourusername/MousePatrol.git
-   cd MousePatrol
+   git clone https://github.com/f1nal04/mouse-patrol.git
+   cd mouse-patrol
    ```
 
-2. Run the script:
+2. Install dependencies:
 
    ```sh
-   python main.py
+   pip install -r requirements.txt
    ```
 
-3. To stop the program, press `Ctrl+C` or move your mouse to the top-left corner of the screen.
+## Usage
+
+### If installed via pip:
+
+```sh
+mouse-patrol
+```
+
+### If using manual installation:
+
+```sh
+python mouse_patrol/main.py
+```
+
+To stop the program, press `Ctrl+C` or move your mouse to the top-left corner of the screen.
 
 ## Disclaimer
 

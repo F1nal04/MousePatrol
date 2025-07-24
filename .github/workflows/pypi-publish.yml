@@ -1,0 +1,80 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    name: Build and publish Python distribution to PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Verify version matches release tag
+        run: |
+          RELEASE_VERSION="${{ github.event.release.tag_name }}"
+          # Remove 'v' prefix from tag
+          RELEASE_VERSION="${RELEASE_VERSION#v}"
+
+          # Get version from pyproject.toml
+          TOML_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+
+          echo "Release tag version: $RELEASE_VERSION"
+          echo "pyproject.toml version: $TOML_VERSION"
+
+          if [ "$RELEASE_VERSION" != "$TOML_VERSION" ]; then
+            echo "❌ Version mismatch! Release tag ($RELEASE_VERSION) doesn't match pyproject.toml ($TOML_VERSION)"
+            exit 1
+          fi
+
+          echo "✅ Version verification passed"
+
+      - name: Build distribution packages
+        run: python -m build
+
+      - name: Verify build artifacts
+        run: |
+          echo "📦 Built packages:"
+          ls -la dist/
+
+          # Verify we have both wheel and source distribution
+          if ! ls dist/*.whl 1> /dev/null 2>&1; then
+            echo "❌ No wheel (.whl) file found"
+            exit 1
+          fi
+
+          if ! ls dist/*.tar.gz 1> /dev/null 2>&1; then
+            echo "❌ No source distribution (.tar.gz) file found"
+            exit 1
+          fi
+
+          echo "✅ Build verification passed"
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          print-hash: true
+
+      - name: Output success message
+        run: |
+          echo "🎉 Successfully published mouse-patrol ${{ github.event.release.tag_name }} to PyPI!"
+          echo "📦 Package URL: https://pypi.org/project/mouse-patrol/"
+          echo "💡 Users can now install with: pip install mouse-patrol"

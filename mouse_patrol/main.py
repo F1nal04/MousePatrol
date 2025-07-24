@@ -1,46 +1,43 @@
+#!/usr/bin/env python3
+
 import pyautogui
 import time
+
+# Configuration
+SQUARE_SIZE = 100
+MOVE_DURATION = 0.25
+INTERVAL = 60
 
 # Enable safety feature (for emergency stop: move mouse to corner)
 pyautogui.FAILSAFE = True
 
-# Size of the square (in pixels)
-square_size = 100
-
-# Speed of mouse movement (in seconds)
-move_duration = 0.25
-
-# Tweening function for smooth movement
-tween_func = pyautogui.easeInOutQuad
-
 
 def move_in_square():
-    """Moves the mouse in a square"""
     # Save current position
     start_x, start_y = pyautogui.position()
 
     print(f"Starting square movement from position ({start_x}, {start_y})")
 
     # Move right
-    pyautogui.moveTo(start_x + square_size, start_y,
-                     duration=move_duration, tween=tween_func)
+    pyautogui.moveTo(start_x + SQUARE_SIZE, start_y,
+                     duration=MOVE_DURATION, tween=pyautogui.easeInOutQuad)
 
     # Move down
-    pyautogui.moveTo(start_x + square_size, start_y + square_size,
-                     duration=move_duration, tween=tween_func)
+    pyautogui.moveTo(start_x + SQUARE_SIZE, start_y + SQUARE_SIZE,
+                     duration=MOVE_DURATION, tween=pyautogui.easeInOutQuad)
 
     # Move left
-    pyautogui.moveTo(start_x, start_y + square_size,
-                     duration=move_duration, tween=tween_func)
+    pyautogui.moveTo(start_x, start_y + SQUARE_SIZE,
+                     duration=MOVE_DURATION, tween=pyautogui.easeInOutQuad)
 
     # Move up (back to start)
     pyautogui.moveTo(start_x, start_y,
-                     duration=move_duration, tween=tween_func)
+                     duration=MOVE_DURATION, tween=pyautogui.easeInOutQuad)
 
     print("Square movement completed")
 
 
-def main():
+def start_patrol():
     print("MousePatrol started!")
     print("To exit: Press Ctrl+C or move the mouse to the upper left corner")
     print("-" * 50)
@@ -48,13 +45,17 @@ def main():
     try:
         while True:
             move_in_square()
-            print(f"Waiting 60 seconds until the next movement...")
-            time.sleep(60)  # Wait 60 seconds = 1 minute
+            print(f"Waiting {INTERVAL} seconds until the next movement...")
+            time.sleep(INTERVAL)
 
     except KeyboardInterrupt:
         print("\nProgram terminated.")
     except pyautogui.FailSafeException:
         print("\nEmergency stop: Mouse moved to corner.")
+
+
+def main():
+    start_patrol()
 
 
 if __name__ == "__main__":
