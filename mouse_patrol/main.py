@@ -100,7 +100,6 @@ def start_patrol():
         ("\n\n📋 Configuration:", "bold"),
         (f"\n  • Shape: Square", "cyan"),
         (f"\n  • Interval: {INTERVAL}s", "cyan"),
-        (f"\n  • Initial delay: 30s", "cyan"),
         ("\n\n🛡️  Safety Features:", "bold"),
         ("\n  • Press Ctrl+C to exit", "yellow"),
         ("\n  • Move mouse to upper-left corner for emergency stop", "yellow"),
