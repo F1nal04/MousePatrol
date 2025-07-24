@@ -1,4 +1,4 @@
-name: Create Version Tag
+name: Create new version and tag it
 on:
   workflow_dispatch:
     inputs:
@@ -131,17 +131,31 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION (was $LATEST_TAG)"
 
-      - name: Create and push git tag
+      - name: Update version in pyproject.toml
+        run: |
+          NEW_VERSION="${{ steps.calc_version.outputs.new_version }}"
+
+          # Update version in pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+
+          echo "Updated pyproject.toml version to: $NEW_VERSION"
+
+      - name: Commit version update and create tag
         run: |
           NEW_VERSION="${{ steps.calc_version.outputs.new_version }}"
 
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
+          # Add and commit the version update
+          git add pyproject.toml
+          git commit -m "chore: bump version to $NEW_VERSION"
+
           # Create annotated tag with release information
           git tag -a "v$NEW_VERSION" -m "Release version $NEW_VERSION"
 
-          # Push the tag to remote
+          # Push the commit and tag to remote
+          git push origin HEAD
           git push origin "v$NEW_VERSION"
 
-          echo "Created and pushed tag: v$NEW_VERSION"
+          echo "Updated pyproject.toml, committed changes, and created tag: v$NEW_VERSION"

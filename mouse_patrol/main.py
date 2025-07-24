@@ -3,10 +3,6 @@
 import pyautogui
 import time
 
-__version__ = "0.2.0"
-__author__ = "Leon Bojanowski"
-__email__ = "leongaborbojanowski04@gmail.com"
-
 # Configuration
 SQUARE_SIZE = 100
 MOVE_DURATION = 0.25
