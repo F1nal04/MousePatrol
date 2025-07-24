@@ -11,7 +11,7 @@ from rich.layout import Layout
 from rich.align import Align
 
 # Configuration
-VERSION = "0.2.1"  # This will be automatically updated by the semver workflow
+VERSION = "0.3.0"  # This will be automatically updated by the semver workflow
 SQUARE_SIZE = 100
 MOVE_DURATION = 0.25
 INTERVAL = 60
