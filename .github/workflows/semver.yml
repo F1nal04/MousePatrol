@@ -131,14 +131,17 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION (was $LATEST_TAG)"
 
-      - name: Update version in pyproject.toml
+      - name: Update version in pyproject.toml and main.py
         run: |
           NEW_VERSION="${{ steps.calc_version.outputs.new_version }}"
 
           # Update version in pyproject.toml
           sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
 
-          echo "Updated pyproject.toml version to: $NEW_VERSION"
+          # Update version in main.py
+          sed -i "s/^VERSION = \".*\"/VERSION = \"$NEW_VERSION\"/" mouse_patrol/main.py
+
+          echo "Updated pyproject.toml and main.py version to: $NEW_VERSION"
 
       - name: Commit version update and create tag
         run: |
@@ -148,7 +151,7 @@ jobs:
           git config --local user.name "GitHub Action"
 
           # Add and commit the version update
-          git add pyproject.toml
+          git add pyproject.toml mouse_patrol/main.py
           git commit -m "chore: bump version to $NEW_VERSION"
 
           # Create annotated tag with release information
