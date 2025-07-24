@@ -96,10 +96,9 @@ def start_patrol():
     startup_text = Text.assemble(
         ("🐭 MousePatrol ", "bold magenta"),
         ("v0.2.1", "dim"),
-        ("\n\nKeeping your system active by moving the mouse in a square pattern", ""),
+        ("\n\nKeeping your system active by moving the mouse in a set interval", ""),
         ("\n\n📋 Configuration:", "bold"),
-        (f"\n  • Square size: {SQUARE_SIZE}px", "cyan"),
-        (f"\n  • Move duration: {MOVE_DURATION}s", "cyan"),
+        (f"\n  • Shape: Square", "cyan"),
         (f"\n  • Interval: {INTERVAL}s", "cyan"),
         ("\n\n🛡️  Safety Features:", "bold"),
         ("\n  • Press Ctrl+C to exit", "yellow"),
