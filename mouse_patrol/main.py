@@ -116,32 +116,32 @@ def start_patrol():
     console.print(startup_panel)
     console.print()
 
-    # Initial 30-second delay before starting mouse movements
-    console.print("🚀 [bold yellow]Starting in 30 seconds...[/bold yellow]")
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TimeElapsedColumn(),
-        TextColumn("/ 30s"),
-        console=console
-    ) as progress:
-
-        task = progress.add_task(
-            "⏳ Preparing to start mouse patrol...",
-            total=30
-        )
-
-        for i in range(30):
-            time.sleep(1)
-            progress.advance(task, 1)
-
-    console.print("✅ [bold green]Starting mouse patrol now![/bold green]")
-    console.print()
-
     try:
+        # Initial 30-second delay before starting mouse movements
+        console.print("🚀 [bold yellow]Starting in 30 seconds...[/bold yellow]")
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            TextColumn("/ 30s"),
+            console=console
+        ) as progress:
+
+            task = progress.add_task(
+                "⏳ Preparing to start mouse patrol...",
+                total=30
+            )
+
+            for i in range(30):
+                time.sleep(1)
+                progress.advance(task, 1)
+
+        console.print("✅ [bold green]Starting mouse patrol now![/bold green]")
+        console.print()
+
         cycle_count = 0
         while True:
             cycle_count += 1
