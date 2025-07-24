@@ -11,6 +11,7 @@ from rich.layout import Layout
 from rich.align import Align
 
 # Configuration
+VERSION = "0.2.1"  # This will be automatically updated by the semver workflow
 SQUARE_SIZE = 100
 MOVE_DURATION = 0.25
 INTERVAL = 60
@@ -95,7 +96,7 @@ def start_patrol():
     # Create a beautiful startup panel
     startup_text = Text.assemble(
         ("🐭 MousePatrol ", "bold magenta"),
-        ("v0.2.1", "dim"),
+        (f"v{VERSION}", "dim"),
         ("\n\nKeeping your system active by moving the mouse in a set interval", ""),
         ("\n\n📋 Configuration:", "bold"),
         (f"\n  • Shape: Square", "cyan"),
